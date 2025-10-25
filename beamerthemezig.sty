@@ -1,0 +1,241 @@
+\ProvidesPackage{beamerthemezig}[]
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\RequirePackage{kvoptions}
+\SetupKeyvalOptions{family=up,prefix=up@}
+
+\DeclareBoolOption[true]{english}
+\DeclareComplementaryOption{german}{english}
+
+\DeclareDefaultOption{\PassOptionsToPackage{\CurrentOption}{smile}}
+
+\ProcessKeyvalOptions*
+
+\ifup@english\RequirePackage[english]{babel}\else\RequirePackage[ngerman]{babel}\fi
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\RequirePackage{calc}
+\RequirePackage{microtype}
+\RequirePackage{etoolbox}
+\RequirePackage{tcolorbox}
+\tcbuselibrary{skins}
+\RequirePackage[
+	tikz,
+	hyperref,
+	pdftitle={\noexpand\inserttitle},
+	pdfauthor={\noexpand\insertauthor},
+	pdfsubject={\noexpand\inserttitle},
+	coloraccent=yellow
+]{smile}
+
+\usetikzlibrary{overlay-beamer-styles,decorations.markings}
+\tikzset{
+	node distance=5mm,
+	invisible/.style={opacity=0},
+	muted/.style={opacity=0.3},
+	visible on/.style={alt={#1{}{invisible}}},
+	vo/.style={alt={#1{}{invisible}}},
+	hidden on/.style={alt={#1{invisible}{}}},
+	muted on/.style={alt={#1{muted}{}}},
+	unmuted on/.style={alt={#1{}{muted}}},
+	alt/.code args={<#1>#2#3}{%
+		\alt<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}}
+	},
+	ffill/.style n args={3}{path picture={
+		\fill[#1] (path picture bounding box.south west) rectangle ($(path picture bounding box.north west)!#2/#3!(path picture bounding box.north east)$);
+	}},
+	modal background/.style={fill=black,opacity=0.7},
+	modal box/.style={draw=black,rnd,fill=white,lw,shadow,inner sep=3mm,text width=0.66\paperwidth},
+	modal title/.style={roundednode,fill=black,text=white}
+}
+
+\usetikzlibrary{tikzmark}
+\def\m#1{\tikzmark{#1}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newcounter{allframes}
+\def\stepframe{%
+	\ifbeamer@isfragile%
+		\stepcounter{allframes}%
+	\else%
+		\ifbeamer@noframenumbering\else%
+			\stepcounter{allframes}%
+		\fi%
+	\fi%
+	\ifnum\theallframes=0\setcounter{allframes}{1}\fi%
+}
+
+\BeforeBeginEnvironment{frame}{\stepframe}
+\pretocmd\againframe{\stepframe}{}{}
+
+\def\refreshcountsinaux{%
+	\immediate\write\@auxout{\global\noexpand\@namedef{s@totalframes}{\theallframes}}%
+}
+
+\AtEndDocument{\refreshcountsinaux}
+
+\def\totalframes{%
+	\ifcsdef{s@totalframes}{%
+		\csname s@totalframes\endcsname%
+	}{1}%
+}
+
+
+\def\ps@navigation@titlepage{\setbeamertemplate{footline}{}\@nameuse{ps@navigation}}
+
+\setbeamertemplate{footline}{
+	\begin{tikzpicture}[o,node distance=1mm]
+		\node[roundednode,rounded corners=.5mm,fill=darkgray!40!black,shadow,draw=none,minimum width=\dimexpr\textwidth-1.2cm\relax,anchor=south,ffill={accent!40!black}{\theallframes}{\totalframes},yshift=2mm] at (current page.south) (L) {};
+		\node[left=of L] {\theallframes};
+		\node[right=of L] {\totalframes};
+	\end{tikzpicture}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\def\maketitle{
+	\begin{frame}[noframenumbering,plain]
+		\titlepage
+	\end{frame}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\setbeamercolor{normal text}{fg=white}
+\setbeamercolor{background canvas}{bg=black}
+\setbeamercolor{alerted text}{fg=accent}
+\setbeamercolor{title}{fg=accent}
+\setbeamercolor{frametitle}{fg=accent}
+\setbeamercolor{itemize item}{fg=blue}
+\setbeamercolor{itemize subitem}{fg=blue}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\setbeamerfont{title}{
+	size=\Huge,
+	shape=\bfseries\scshape
+}
+\setbeamerfont{subtitle}{
+	size=\large,
+	shape=\normalfont
+}
+\setbeamerfont{author}{
+	size=\normalsize,
+	shape=\normalfont
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newlength\up@textmargin\setlength{\up@textmargin}{0.05\paperwidth}
+\setbeamersize{text margin left=\up@textmargin}
+\setbeamersize{text margin right=\up@textmargin}
+
+\setbeamertemplate{caption}{\insertcaption}
+\setbeamertemplate{blocks}[rounded][shadow=false]
+\setbeamertemplate{itemize item}[circle]
+\setbeamertemplate{itemize subitem}[circle]
+
+\addtobeamertemplate{frametitle continuation}{\color{gray}(}{)}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{headline}{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\ensureinfocommand{title}
+\ensureinfocommand{author}
+\def\inserttitle{\ifdefined\@title\@title\fi}
+\def\insertauthor{\ifdefined\@author\@author\fi}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\let\oldft\frametitle
+\renewcommand\frametitle[2][]{%
+	\ifx\relax#1\relax\oldft{#2}\else%
+		\ifnum\beamer@autobreakcount>0\oldft[#1]{#2}\else%
+			\oldft{#2\hfill\normalfont\large\color{darkgray}\raisebox{0.3ex}{#1}}%
+		\fi%
+	\fi%
+}
+
+\RequirePackage{tikzpingus}
+\newsavebox\pingubb
+\AtEndDocument{
+	\savebox\pingubb{\begin{tikzpicture}
+		\pingu[glow=accent,body type=chubby,right wing wave,sign post left={Questions?},gold medal,sunglasses,pumpkin-hat,tie=blue,lollipop right=green,feet=sit]
+	\end{tikzpicture}}
+	{\setbeamercolor{background canvas}{bg=accent!20!black}
+	\begin{frame}[b,noframenumbering]%
+		\thispagestyle{navigation@titlepage}%
+		\vfill\color{white}\Large\textbf{\bubbly\insertauthor}\vskip0.5em\scriptsize Zigtoberfest,~\insertdate\hfill lukas@pietzschmann.org\par\medskip%
+		\begin{tikzpicture}[o]
+			\node[yshift=4mm] at (current page) {\scalebox{1.2}{\usebox\pingubb}};
+		\end{tikzpicture}
+	\end{frame}}
+}
+
+\tikzset{ul/.style={#1,opacity=0.55,rounded corners=.17ex}}
+\newcommand\ul[5][0pt]{\begin{tikzpicture}[o]
+	\coordinate(#5_west) at ([yshift=#1-0.2ex]pic cs:#3);
+	\coordinate(#5_east) at ([yshift=#1+0.4ex]pic cs:#4);
+	\fill[ul=#2] (#5_west) rectangle node(#5){} (#5_east);
+\end{tikzpicture}}
+
+\newenvironment<>{modal}[1][]{%
+	\def\titlename{#1}%
+	\visibleenv#2%
+	\begin{tikzpicture}[o,node distance=0pt]%
+		\fill[modal background] (current page.south west) rectangle (current page.north east);%
+		\node[modal box] at (current page) (MODALCONTENT) \bgroup%
+}{%
+		\egroup;%
+		\if\expandafter\isempty\expandafter{\titlename}\else\node[modal title] at (MODALCONTENT.north) {\titlename};\fi
+	\end{tikzpicture}%
+	\endvisibleenv%
+}
+
+\newtcolorbox{beamerbox}[3][]{boxrule=\smile@linewidth,
+IfBlankTF={#3}{toprule=2mm}{title=#3},colback=#2!15!black,colframe=#2!75!black,colupper=white,collower=white,
+left=0em,lefttitle=4mm, arc=\smile@rounding, enhanced, segmentation engine=path,
+segmentation style={lcr, solid, shorten >=1mm,shorten <=1mm, line width=\smile@linewidth},#1}
+
+\renewenvironment{definition}[1][\empty]{%
+	\begin{beamerbox}{gray}{#1}%
+}{\end{beamerbox}}
+
+\renewenvironment{block}[1][]{%
+	\begin{beamerbox}{accent}{#1}%
+}{\end{beamerbox}}
+
+\renewenvironment{examples}[1][]{%
+	\begin{beamerbox}{green}{#1}%
+}{\end{beamerbox}}
+
+\renewenvironment{alertblock}[1][]{%
+	\begin{beamerbox}{red}{#1}%
+}{\end{beamerbox}}
