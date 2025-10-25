@@ -76,6 +76,11 @@
 }
 \def\picframerect#1#2{\picframe{#1}{#1}{#2}}
 
+\tikzset{
+	arrow/.append style={draw=white},
+	modal title/.append style={draw=white}
+}
+
 \title{Un-locked Zig\\[1em]Synchronizing Code without Locks}
 \author{Lukas Pietzschmann}
 \date{October 25\textsuperscript{th}, 2025}
@@ -452,7 +457,8 @@
 
 		var counter: atomic.Value(u32) = atomic.Value(u32).init(0);
 		counter.fetchAdd(1, .SeqCst);
-	\end{lstlisting}\m{ceb}\pause
+	\end{lstlisting}\m{ceb}
+	\begin{visibleenv}<5-|handout:2>
 	\begin{tikzpicture}[o]
 		\coordinate (csb) at (pic cs:csa);
 		\coordinate (ceb) at (pic cs:cea);
@@ -462,6 +468,7 @@
 			@atomicRmw(u32, counter, .Add, 1, .SeqCst);
 		\end{lstlisting}};
 	\end{tikzpicture}
+	\end{visibleenv}
 \end{frame}
 
 \savebox\pingub{\begin{tikzpicture}
@@ -493,14 +500,14 @@
 	% 	\node[yshift=1mm,anchor=east,vo=<5->] at (pic cs:l4c) {\small\color{blue}\faHandPointRight};
 	% 	\node[yshift=1mm,anchor=east,vo=<6->] at (pic cs:l5c) {\small\color{blue}\faHandPointRight};
 	% \end{tikzpicture}
-	\begin{onlyenv}<2-|handout:2>
+	\begin{visibleenv}<2-|handout:2>
 	\begin{tikzpicture}[o]
 		\filldraw[black,opacity=.75] ([yshift=-1cm]current page.north west) rectangle (current page.south east);
 		\node[yshift=-1cm] at (current page.center) (P) {\usebox\pingub};
 		\node[shift={(1cm,2.5cm)}] at (P) (T) {Why is \texttt{next} not atomic?};
 		\draw[lw,rnd,lcr] (P) to (T);
 	\end{tikzpicture}
-	\end{onlyenv}
+	\end{visibleenv}
 \end{frame}
 
 \begin{frame}[fragile]
